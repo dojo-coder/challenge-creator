@@ -1,0 +1,26 @@
+{
+  "folders": {
+    "/contracts": {
+      "visible": true,
+      "readonly": false,
+      "redacted": false
+    },
+    "/migrations": {
+      "visible": true,
+      "readonly": false,
+      "redacted": false
+    }
+  },
+  "files": {
+    "/contracts/Voting.sol": {
+      "visible": true,
+      "readonly": false,
+      "redacted": false
+    },
+    "/migrations/1_deploy_voting.js": {
+      "visible": true,
+      "readonly": false,
+      "redacted": false
+    }
+  }
+}

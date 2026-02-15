@@ -1,0 +1,25 @@
+**/node_modules/
+/challenges/*
+!/challenges/.gitkeep
+/samples/**node_modules/**
+/temp/*
+!/temp/.gitkeep
+templatesConfiguration.json
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.*
+
+# Logs
+*.log
+npm-debug.log*

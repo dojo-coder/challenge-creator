@@ -1,0 +1,29 @@
+{
+  "name": "challenge-creator",
+  "version": "1.0.0",
+  "description": "Create coding challenges for the DojoCode platform using AI-powered tools and MCP.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dojo-coder/challenge-creator.git"
+  },
+  "keywords": [
+    "dojocode",
+    "coding-challenges",
+    "mcp",
+    "ai",
+    "education",
+    "model-context-protocol"
+  ],
+  "author": "DojoCode",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dojo-coder/challenge-creator/issues"
+  },
+  "homepage": "https://github.com/dojo-coder/challenge-creator",
+  "dependencies": {
+    "jszip": "^3.10.1"
+  }
+}

@@ -2,49 +2,58 @@
 mod tests_all {
     use crate::app::longest_palindromic_substring as lps;
 
-    #[test]
-    fn babad_returns_bab_or_aba() {
+#[test]
+    /// Should find a longest palindrome in a string with multiple valid answers
+    fn babad_returns_valid_palindrome() {
         let res = lps("babad");
         assert!(res == "bab" || res == "aba");
     }
 
     #[test]
-    fn cbbd_returns_bb() {
+    /// Should detect even-length palindromes correctly
+    fn cbbd_handles_even_length() {
         assert_eq!(lps("cbbd"), "bb");
     }
 
     #[test]
-    fn a_returns_a() {
+    /// Should handle single-character input
+    fn single_char_returns_itself() {
         assert_eq!(lps("a"), "a");
     }
 
     #[test]
-    fn aa_returns_aa() {
+    /// Should handle two identical characters
+    fn double_char_returns_itself() {
         assert_eq!(lps("aa"), "aa");
     }
 
     #[test]
-    fn empty_returns_empty() {
+    /// Should return empty string for empty input
+    fn empty_input_returns_empty() {
         assert_eq!(lps(""), "");
     }
 
     #[test]
-    fn banana_returns_anana() {
+    /// Should detect palindromes inside larger words
+    fn banana_detects_long_palindrome() {
         assert_eq!(lps("banana"), "anana");
     }
 
     #[test]
-    fn racecar_returns_racecar() {
+    /// Should return full string if it is a palindrome
+    fn racecar_full_string_palindrome() {
         assert_eq!(lps("racecar"), "racecar");
     }
 
     #[test]
-    fn madam_returns_madam() {
+    /// Should correctly identify complete palindromic words
+    fn madam_detects_palindrome() {
         assert_eq!(lps("madam"), "madam");
     }
 
     #[test]
-    fn aaaa_returns_aaaa() {
+    /// Should handle repeated identical characters correctly
+    fn repeated_a_detects_palindrome() {
         assert_eq!(lps("aaaa"), "aaaa");
     }
 }

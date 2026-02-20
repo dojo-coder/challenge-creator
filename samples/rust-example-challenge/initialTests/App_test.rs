@@ -2,34 +2,34 @@
 mod tests_initial {
     use crate::app::longest_palindromic_substring as lps;
 
-    /// Returns 'bab' or 'aba' for s="babad"
     #[test]
-    fn babad_returns_bab_or_aba() {
+    /// Should find a longest palindrome in a string with multiple valid answers
+    fn babad_returns_valid_palindrome() {
         let res = lps("babad");
         assert!(res == "bab" || res == "aba");
     }
 
-    /// Returns 'bb' for s="cbbd"
     #[test]
-    fn cbbd_returns_bb() {
+    /// Should detect even-length palindromes correctly
+    fn cbbd_handles_even_length() {
         assert_eq!(lps("cbbd"), "bb");
     }
 
-    /// Returns 'a' for s="a"
     #[test]
-    fn single_char_a_returns_a() {
+    /// Should handle single-character input
+    fn single_char_returns_itself() {
         assert_eq!(lps("a"), "a");
     }
 
-    /// Returns 'aa' for s="aa"
     #[test]
-    fn double_a_returns_aa() {
+    /// Should handle two identical characters
+    fn double_char_returns_itself() {
         assert_eq!(lps("aa"), "aa");
     }
 
-    /// Returns '' for empty string
     #[test]
-    fn empty_string_returns_empty() {
+    /// Should return empty string for empty input
+    fn empty_input_returns_empty() {
         assert_eq!(lps(""), "");
     }
 }

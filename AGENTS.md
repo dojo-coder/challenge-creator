@@ -34,6 +34,7 @@ The system supports two main categories of challenges:
 - **rust**: Rust with test
 - **c**: C with Criterion testing framework
 - **cpp**: C++ with Catch2 testing framework
+- **csharp**: C# with xUnit testing framework
 - **solidity**: Solidity with mocha testing
 
 Note: The Node templates (`nodejs-jest`, `nodets-jest`) support running an HTTP server (for example using Node's built-in `http` or `express`). This enables two optional interactive behaviors that a challenge variation may expose:
@@ -144,7 +145,7 @@ Each directory has a corresponding JSON configuration file:
 ### 2. All Translations Generation
 
 - Only when explicitly instructed to "generate for all translations" should you create files for all available templates
-- Currently supports terminal templates: nodejs-jest, nodets-jest, python, php, java, ruby, rust, c, cpp, solidity
+- Currently supports terminal templates: nodejs-jest, nodets-jest, python, php, java, ruby, rust, c, cpp, csharp, solidity
 - Currently supports browser templates: vuejs-jest, vuets-jest, reactjs-jest, reactts-jest, svelte-jest, vanillajs-jest, vanillats-jest, angular-jest
 
 ### 3. Export Content Generation
@@ -256,7 +257,7 @@ Avoid lengthy implementation details or extensive code examples that can be foun
 
 ### Main Files (Terminal Challenges Only)
 
-**Important**: All terminal challenges (nodejs-jest, python, php, java, ruby, rust, c, cpp, solidity) **must include a main file** in both `preloadedFiles/` and `solutionFiles/` directories. The main file enables users to run and debug their code directly using the Run button without executing the full test suite.
+**Important**: All terminal challenges (nodejs-jest, python, php, java, ruby, rust, c, cpp, csharp, solidity) **must include a main file** in both `preloadedFiles/` and `solutionFiles/` directories. The main file enables users to run and debug their code directly using the Run button without executing the full test suite.
 
 **Purpose**: The main file serves as an entry point that imports/calls functions from the solution file and outputs results to the console, allowing users to:
 
@@ -282,6 +283,7 @@ Avoid lengthy implementation details or extensive code examples that can be foun
 - **rust**: `main.rs`
 - **c**: `main.c`
 - **cpp**: `main.cpp`
+- **csharp**: `Main.cs` (in `Challenge` namespace)
 - **solidity**: `main.js`
 
 **Main File Examples**:
@@ -378,6 +380,22 @@ int main() {
 }
 ```
 
+**C# (Main.cs)**:
+
+```csharp
+namespace Challenge
+{
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            string result = HelloWorld.Hello();
+            Console.WriteLine(result);
+        }
+    }
+}
+```
+
 **Note**: Browser challenges (vuejs-jest, vuets-jest, reactjs-jest, reactts-jest, svelte-jest, vanillajs-jest, vanillats-jest, angular-jest) do **not** require main files as they use browser preview instead of code execution.
 
 ### Solution Files (solutionFiles/)
@@ -413,7 +431,7 @@ int main() {
 - Initial Tests: 5 tests covering basic functionality
 - All Tests: Same 5 tests + 3-7 additional edge case tests = 8-12 total tests
 
-- Use appropriate testing frameworks (Jest for Node.js, VueJS, ReactJS, pytest for Python, PHPUnit for php, Jupiter for Java, rspec for Ruby, test for Rust, Criterion for C, Catch2 for C++)
+- Use appropriate testing frameworks (Jest for Node.js, VueJS, ReactJS, pytest for Python, PHPUnit for php, Jupiter for Java, rspec for Ruby, test for Rust, Criterion for C, Catch2 for C++, xUnit for C#)
 - Include descriptive test names and clear assertions
 
 #### Test Structure by Template
@@ -564,6 +582,14 @@ int main() {
 - Use descriptive test names: `"babad -> 'bab' or 'aba'"`, `"empty -> ''"`
 - Use Catch2 assertions: `REQUIRE()`, `REQUIRE_THAT()`
 
+**C#/xUnit (Terminal)**:
+
+- Use `using Xunit;`
+- Structure: `public class TestClassName { [Fact(DisplayName = "test description")] public void TestMethodName() { ... } }`
+- Use `namespace Challenge` for all test classes
+- Use descriptive `DisplayName` attributes: `"It should return 'Hello World!'"`, `"Returns empty for null input"`
+- Use xUnit assertions: `Assert.Equal()`, `Assert.True()`, `Assert.Throws<>()`
+
 #### Test File Imports
 
 **Important**: During test execution, author solution files are copied to the test root directory. Therefore, test files should import components/modules from the current directory, **not** from `../solutionFiles/`:
@@ -621,6 +647,10 @@ use crate::app::function_name as alias;
 
 // C++
 #include "app.hpp"
+
+// C#
+using Xunit; // test framework
+// Classes in same namespace are auto-resolved (namespace Challenge)
 ```
 
 **Incorrect Import**:
@@ -639,6 +669,7 @@ use crate::solutionFiles::app::function_name; // ❌ Wrong for Rust
 import { functionName } from "../solutionFiles/index"; // ❌ Wrong for NodeTS
 #include "../solutionFiles/main.h" // ❌ Wrong for C
 #include "../solutionFiles/app.hpp" // ❌ Wrong for C++
+using Challenge.solutionFiles; // ❌ Wrong for C#
 ```
 
 This applies to all test files in both `initialTests/` and `allTests/` directories across all templates.
@@ -708,7 +739,7 @@ const increment = () => {
 - Results captured as `.log` files with summary output
 - Browser tests (Vue.js, Vue.js TypeScript, React.js, React.js TypeScript, Svelte, VanillaJS, VanillaTS, Angular) use Jest with @testing-library
 
-**Note**: Terminal challenges (nodejs-jest, nodets-jest, python, php, Java, Ruby, Rust, C, C++, solidity) do not require package.json files.
+**Note**: Terminal challenges (nodejs-jest, nodets-jest, python, php, Java, Ruby, Rust, C, C++, C#, solidity) do not require package.json files.
 
 ## Challenge Types and Examples
 

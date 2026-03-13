@@ -2,7 +2,7 @@
   "servers": {
     "dojocode": {
       "type": "http",
-      "url": "https://api.dojocode.io/api/v1/mcp/stream"
+      "url": "https://api.dojocode.io/api/v1/mcp"
     }
   }
 }

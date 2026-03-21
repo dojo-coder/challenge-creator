@@ -84,7 +84,7 @@ Pre-configured MCP files are included for all supported tools. Follow the setup 
 | Cursor | `.cursor/mcp.json` | [Cursor setup](https://docs.dojocode.io/ide-integration/cursor) |
 | VS Code (Copilot) | `.vscode/mcp.json` | [VS Code setup](https://docs.dojocode.io/ide-integration/vscode) |
 | Gemini CLI | `.gemini/settings.json` | [Gemini CLI setup](https://docs.dojocode.io/ide-integration/gemini-cli) |
-| Other MCP clients | Manual config | Use endpoint: `https://api.dojocode.io/api/v1/mcp/stream` |
+| Other MCP clients | Manual config | Use endpoint: `https://api.dojocode.io/api/v1/mcp` |
 
 ## Usage
 
@@ -110,6 +110,8 @@ fully test the challenge fizz-buzz-challenge for template nodejs-jest
 See `AGENTS.md` for the full list of workflows and MCP commands.
 
 ## How It Works
+
+![Challenge creation demo in Claude Code](prompt-to-challenge-claude-code-example.gif)
 
 1. **Describe** — Tell the AI what challenge you want to create
 2. **Generate** — The AI produces starter code, solution, tests, and metadata following the templates in `AGENTS.md`

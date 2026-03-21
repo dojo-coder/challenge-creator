@@ -1,6 +1,6 @@
-# DojoCode Challenge Creator
+# Prompt to Challenge
 
-> **Prompt to Challenge** — Describe a coding challenge, and AI builds it for you.
+> Create coding challenges on DojoCode using AI-powered tools and MCP.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node.js >=18](https://img.shields.io/badge/Node.js-%3E%3D18-green.svg)](https://nodejs.org/)

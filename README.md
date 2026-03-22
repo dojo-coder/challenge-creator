@@ -5,6 +5,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node.js >=18](https://img.shields.io/badge/Node.js-%3E%3D18-green.svg)](https://nodejs.org/)
 [![Platform: DojoCode](https://img.shields.io/badge/Platform-DojoCode-purple.svg)](https://dojocode.io)
+[![Docs](https://img.shields.io/badge/Docs-docs.dojocode.io-blue.svg)](https://docs.dojocode.io)
+[![Discord](https://img.shields.io/badge/Discord-join-7289da?logo=discord&logoColor=white)](https://discord.com/invite/7vVMx9nSpX)
 
 ## Overview
 
@@ -14,9 +16,9 @@ DojoCode Challenge Creator is a starter repo for creating coding challenges on t
 
 - AI-powered challenge creation via natural language
 - MCP integration with Claude Code, Codex, Cursor, VS Code Copilot, Gemini CLI, and more
-- 18 language/framework templates (terminal + browser)
+- [18 language/framework templates](https://docs.dojocode.io/templates/) (terminal + browser)
 - Structured output: starter code, solutions, test suites
-- Automated packaging and platform upload
+- Automated packaging and upload to [DojoCode](https://dojocode.io)
 - Sample challenges for every supported template
 
 ## Supported Languages & Frameworks
@@ -109,6 +111,8 @@ fully test the challenge fizz-buzz-challenge for template nodejs-jest
 
 See `AGENTS.md` for the full list of workflows and MCP commands.
 
+For a step-by-step walkthrough, check the [challenge creation guide](https://docs.dojocode.io/challenge/curation/create-code-challenge) in the docs.
+
 ## How It Works
 
 ![Challenge creation demo in Claude Code](prompt-to-challenge-claude-code-example.gif)
@@ -116,7 +120,7 @@ See `AGENTS.md` for the full list of workflows and MCP commands.
 1. **Describe** — Tell the AI what challenge you want to create
 2. **Generate** — The AI produces starter code, solution, tests, and metadata following the templates in `AGENTS.md`
 3. **Package** — Files are bundled into a `exportedContent.zip` via `createExportContent.js`
-4. **Publish** — The challenge is uploaded to DojoCode through MCP commands
+4. **Publish** — The challenge is uploaded to [DojoCode](https://dojocode.io) through [MCP commands](https://docs.dojocode.io/ide-integration/introduction)
 5. **Review** — Validate with automated test runs (initial tests, all tests, preloaded file tests)
 
 ## Project Structure
@@ -170,6 +174,20 @@ challenges/[challenge-name]/
         └── exportedContent.zip       # Packaged for upload
 ```
 
+## About DojoCode
+
+[DojoCode](https://dojocode.io) is a free online coding platform where you can solve challenges, compete in contests, and collaborate with other developers — all in the browser.
+
+- **No setup required** — code and test directly in the browser
+- **12+ languages** — JavaScript, Python, Java, Go, Rust, C++, C#, PHP, Ruby, TypeScript, Solidity, and more
+- **AI Assistant** — get hints and explanations powered by AI
+- **Automated testing** — every challenge has built-in test suites
+- **Live collaboration** — pair program with others in real-time
+- **Contests** — compete with developers worldwide
+- **Gamification** — earn XP, [level up](https://docs.dojocode.io/gamification/levels), and unlock achievements
+
+[Browse Challenges](https://dojocode.io) · [Read the Docs](https://docs.dojocode.io) · [Join Discord](https://discord.com/invite/7vVMx9nSpX)
+
 ## Contributing
 
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
@@ -182,4 +200,8 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 - [DojoCode Platform](https://dojocode.io)
 - [Documentation](https://docs.dojocode.io)
+- [Discord Community](https://discord.com/invite/7vVMx9nSpX)
+- [YouTube](https://www.youtube.com/@dojocode)
+- [LinkedIn](https://www.linkedin.com/company/dojocodeplatform)
+- [Instagram](https://www.instagram.com/dojocodeofficial/)
 - [GitHub Issues](https://github.com/dojo-coder/challenge-creator/issues)

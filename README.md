@@ -16,7 +16,7 @@ DojoCode Challenge Creator is a starter repo for creating coding challenges on t
 
 - AI-powered challenge creation via natural language
 - MCP integration with Claude Code, Codex, Cursor, VS Code Copilot, Gemini CLI, and more
-- [18 language/framework templates](https://docs.dojocode.io/templates/) (terminal + browser)
+- [18 language/framework templates](https://docs.dojocode.io/templates/introduction) (terminal + browser)
 - Structured output: starter code, solutions, test suites
 - Automated packaging and upload to [DojoCode](https://dojocode.io)
 - Sample challenges for every supported template
@@ -186,7 +186,7 @@ challenges/[challenge-name]/
 - **Contests** — compete with developers worldwide
 - **Gamification** — earn XP, [level up](https://docs.dojocode.io/gamification/levels), and unlock achievements
 
-[Browse Challenges](https://dojocode.io) · [Read the Docs](https://docs.dojocode.io) · [Join Discord](https://discord.com/invite/7vVMx9nSpX)
+[Browse Challenges](https://dojocode.io/explore-challenges) · [Read the Docs](https://docs.dojocode.io) · [Join Discord](https://discord.com/invite/7vVMx9nSpX)
 
 ## Contributing
 

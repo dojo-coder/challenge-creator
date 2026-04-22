@@ -36,7 +36,7 @@ The system supports two main categories of challenges:
 - **cpp**: C++ with Catch2 testing framework
 - **csharp**: C# with xUnit testing framework
 - **go**: Go with testing package
-- **solidity**: Solidity with mocha testing
+- **solidity**: Solidity with Foundry (`forge test`) — Solidity-native tests via `forge-std/Test.sol`
 
 Note: The Node templates (`nodejs-jest`, `nodets-jest`) support running an HTTP server (for example using Node's built-in `http` or `express`). This enables two optional interactive behaviors that a challenge variation may expose:
 
@@ -286,7 +286,7 @@ Avoid lengthy implementation details or extensive code examples that can be foun
 - **cpp**: `main.cpp`
 - **csharp**: `Main.cs` (in `Challenge` namespace)
 - **go**: `main.go`
-- **solidity**: `main.js`
+- **solidity**: `Main.s.sol` (Foundry script at challenge root, extends `forge-std/Script.sol`; `run()` is the entrypoint)
 
 **Main File Examples**:
 
@@ -411,6 +411,34 @@ func main() {
 }
 ```
 
+**Solidity (Main.s.sol)**:
+
+Lives at the challenge root (next to `foundry.toml`, alongside `src/` and `test/`). The file is a Foundry **script** that extends `forge-std/Script.sol`; its `run()` function is the entrypoint. Executed via `forge script Main.s.sol` — no anvil/local node is needed. `console.log` from `forge-std/console.sol` writes to the Run Code output panel; `vm.*` cheatcodes (e.g. `vm.prank`) are available for impersonation.
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.34;
+
+import "forge-std/Script.sol";
+import "forge-std/console.sol";
+import "./src/HelloWorld.sol";
+
+contract Main is Script {
+    function run() external {
+        HelloWorld instance = new HelloWorld();
+        console.log(instance.helloWorld());
+    }
+}
+```
+
+Key layout rules for Solidity challenges:
+
+- Contracts go under `/src/` — e.g. `/src/HelloWorld.sol`.
+- Tests go under `/tests/` with the `.t.sol` extension and extend `forge-std/Test.sol` — e.g. `/tests/HelloWorld.t.sol`.
+- The main script sits at the root — `/Main.s.sol` — so `mainFilePath` is `/Main.s.sol` in `metadata.json`.
+- A one-line comment directly above each `function test*()` in a `.t.sol` file becomes the human-readable test label: `// ...`, `/// ...`, `/// @notice ...`, or `/// @dev ...` are all recognised.
+- npm packages (OpenZeppelin, Chainlink, etc.) are auto-remapped from `node_modules/` because `foundry.toml` declares `libs = ["lib", "node_modules"]` with `auto_detect_remappings = true` — forge scans both paths and generates remappings at build time. Import as `@openzeppelin/contracts/utils/Strings.sol` directly.
+
 **Note**: Browser challenges (vuejs-jest, vuets-jest, reactjs-jest, reactts-jest, svelte-jest, vanillajs-jest, vanillats-jest, angular-jest) do **not** require main files as they use browser preview instead of code execution.
 
 ### Solution Files (solutionFiles/)
@@ -446,7 +474,7 @@ func main() {
 - Initial Tests: 5 tests covering basic functionality
 - All Tests: Same 5 tests + 3-7 additional edge case tests = 8-12 total tests
 
-- Use appropriate testing frameworks (Jest for Node.js, VueJS, ReactJS, pytest for Python, PHPUnit for php, Jupiter for Java, rspec for Ruby, test for Rust, Criterion for C, Catch2 for C++, xUnit for C#, testing for Go)
+- Use appropriate testing frameworks (Jest for Node.js, VueJS, ReactJS, pytest for Python, PHPUnit for php, Jupiter for Java, rspec for Ruby, test for Rust, Criterion for C, Catch2 for C++, xUnit for C#, testing for Go, forge-std for Solidity)
 - Include descriptive test names and clear assertions
 
 #### Test Structure by Template
@@ -613,6 +641,16 @@ func main() {
 - Use `t.Errorf()` for test failure messages
 - All test files must end with `_test.go` suffix
 
+**Solidity/Foundry (Terminal)**:
+
+- Use `import "forge-std/Test.sol";` and import contracts from `"../src/<ContractName>.sol"` (test files live at `/tests/`, contracts at `/src/`)
+- Structure: `contract <Name>Test is Test { function setUp() public { ... } function test...() public { ... } }`
+- Test file names must end with `.t.sol`; function names must start with `test` (`testFuzz*` for fuzzed, `testFail*` for expected-revert)
+- Add a one-line comment directly above each test function — `// ...`, `/// ...`, `/// @notice ...`, or `/// @dev ...` — to produce a human-readable label in the results panel (otherwise the raw function name is shown)
+- Use forge-std assertions: `assertEq`, `assertTrue`, `assertFalse`, `assertGt`, `assertLt`, `assertApproxEqAbs`, `assertApproxEqRel`
+- Use `vm` cheatcodes for setup/impersonation: `vm.prank(addr)` for next-call sender, `vm.expectRevert(bytes("reason"))` to assert a revert, `vm.warp(ts)` / `vm.roll(bn)` for time/block override, `vm.deal(addr, amt)` for ETH balance
+- `setUp()` runs before every test; `address(this)` is the test contract (becomes the deployer/owner for contracts it constructs in `setUp`)
+
 #### Test File Imports
 
 **Important**: During test execution, author solution files are copied to the test root directory. Therefore, test files should import components/modules from the current directory, **not** from `../solutionFiles/`:
@@ -678,6 +716,12 @@ using Xunit; // test framework
 // Go
 // Functions in same package (package main) are auto-resolved
 import "testing"
+
+// Solidity/Foundry
+import "forge-std/Test.sol";
+import "../src/HelloWorld.sol";   // contracts live under /src/, tests under /tests/
+// npm packages are auto-remapped from node_modules/:
+import "@openzeppelin/contracts/utils/Strings.sol";
 ```
 
 **Incorrect Import**:
@@ -698,6 +742,7 @@ import { functionName } from "../solutionFiles/index"; // ❌ Wrong for NodeTS
 #include "../solutionFiles/app.hpp" // ❌ Wrong for C++
 using Challenge.solutionFiles; // ❌ Wrong for C#
 import "solutionFiles/functionname" // ❌ Wrong for Go
+import "../solutionFiles/src/HelloWorld.sol"; // ❌ Wrong for Solidity — use "../src/HelloWorld.sol"
 ```
 
 This applies to all test files in both `initialTests/` and `allTests/` directories across all templates.

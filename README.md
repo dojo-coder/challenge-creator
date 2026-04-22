@@ -36,7 +36,7 @@ DojoCode Challenge Creator is a starter repo for creating coding challenges on t
 | `rust` | Rust | Built-in test |
 | `c` | C | Criterion |
 | `cpp` | C++ | Catch2 |
-| `solidity` | Solidity | Mocha |
+| `solidity` | Solidity | Foundry (`forge test`, `forge-std`) |
 
 ### Browser
 

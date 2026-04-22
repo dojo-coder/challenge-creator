@@ -1,32 +1,22 @@
 {
   "folders": {
-    "/contracts": {
-      "visible": true,
-      "readonly": false,
-      "redacted": false
-    },
-    "/migrations": {
+    "/src": {
       "visible": true,
       "readonly": false,
       "redacted": false
     }
   },
   "files": {
-    "/contracts/Voting.sol": {
+    "/src/Voting.sol": {
       "visible": true,
       "readonly": false,
       "redacted": false
     },
-    "/main.js": {
+    "/Main.s.sol": {
       "visible": true,
       "readonly": false,
-      "redacted": false
-    },
-    "/migrations/1_deploy_voting.js": {
-      "visible": false,
-      "readonly": true,
       "redacted": false
     }
   },
-  "activeFilePath": "/contracts/Voting.sol"
+  "activeFilePath": "/src/Voting.sol"
 }

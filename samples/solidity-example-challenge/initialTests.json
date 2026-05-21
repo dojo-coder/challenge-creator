@@ -1,7 +1,13 @@
 {
-  "folders": {},
+  "folders": {
+    "/tests": {
+      "visible": true,
+      "readonly": false,
+      "redacted": false
+    }
+  },
   "files": {
-    "/voting.test.js": {
+    "/tests/Voting.t.sol": {
       "visible": true,
       "readonly": false,
       "redacted": false

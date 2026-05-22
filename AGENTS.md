@@ -1750,3 +1750,115 @@ Returns a paginated response with challenge objects. Print the response as a tab
 - User: "Find medium difficulty algorithm challenges in JavaScript"
 - Action: Call `get_challenges` with `{ "tags": ["algorithms"], "difficulty": 2, "language": "Javascript" }`
 - Display: Table showing matching challenges
+
+## Get my challenges (manage your own challenges)
+
+When instructed to list, search, or manage the user's own challenges, e.g. "What challenges have I created?", "Show my draft challenges", "List my challenges".
+
+Use `get_my_challenges` instead of `get_challenges` when the user wants to see **their own** challenges. This tool automatically filters by the authenticated user and returns slim challenge objects with pagination metadata.
+
+### Usage
+
+1. **Call `get_my_challenges`**: Use the MCP command `get_my_challenges` with optional filtering:
+
+   **Get all your challenges (paginated):**
+
+   ```json
+   {}
+   ```
+
+   **Filter by status:**
+
+   ```json
+   { "status": "draft" }
+   ```
+
+   **Filter by multiple criteria:**
+
+   ```json
+   { "tags": ["algorithms"], "difficulty": 2, "language": "Python" }
+   ```
+
+### Parameters
+
+| Parameter    | Type             | Required | Description                                                                                                                       |
+| ------------ | ---------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `page`       | number           | No       | Page number (default: 1)                                                                                                          |
+| `limit`      | number           | No       | Items per page (default: 20)                                                                                                      |
+| `search`     | string           | No       | Search term to filter challenges by title                                                                                         |
+| `tags`       | array of strings | No       | Filter by tag names (automatically mapped to tag objects)                                                                         |
+| `difficulty` | number           | No       | Filter by difficulty level (0-3)                                                                                                  |
+| `language`   | string or array  | No       | Filter by programming language name(s) with first letter capitalized (e.g., `"Python"`, `"Javascript"`, `["Python", "Javascript"]`) |
+| `template`   | string or array  | No       | Filter by template name(s) (e.g., `"Python"` or `["Python", "NodeJS"]`)                                                           |
+| `status`     | string           | No       | Filter by challenge status (draft, pending, approved, retired)                                                                    |
+
+### Response
+
+Returns a paginated response with slim challenge objects and pagination metadata:
+
+| Field        | Description                                           |
+| ------------ | ----------------------------------------------------- |
+| `challenges` | Array of slim challenge objects (see columns below)   |
+| `page`       | Current page number                                   |
+| `limit`      | Items per page                                        |
+| `total`      | Total number of challenges matching the filters       |
+| `totalPages` | Total number of pages available                       |
+
+Each challenge object in the array contains:
+
+| Column                | Description                               |
+| --------------------- | ----------------------------------------- |
+| `_id`                 | Challenge unique identifier               |
+| `title`               | Challenge title                           |
+| `slug`                | URL-friendly identifier                   |
+| `status`              | Challenge status (draft, pending, etc.)   |
+| `visibility`          | Challenge visibility                      |
+| `difficulty`          | Voted difficulty level (0-3)              |
+| `defaultDifficulty`   | Default difficulty level (0-3)            |
+| `estimate`            | Estimated time to complete (in minutes)   |
+| `tags`                | Array of tags (id and name only)          |
+| `challengeVariations` | Available template/language variations    |
+| `defaultVariation`    | Default variation ID                      |
+| `createdAt`           | Creation date                             |
+
+**MANDATORY:** The `_id` column MUST always be displayed as the first column in the table. Never omit `_id` for readability or any other reason. Users need the `_id` to reference challenges in follow-up actions (edit, update, delete, etc.). A table without `_id` is broken.
+
+### Pagination
+
+When there are more results than the page limit, use the `totalPages` field to determine if more pages are available. To fetch the next page:
+
+```json
+{ "page": 2 }
+```
+
+### Examples
+
+**Example 1: List all my challenges**
+
+- User: "What challenges have I created?"
+- Action: Call `get_my_challenges` with `{}`
+- Display: Table with columns: `_id`, title, status, difficulty, templates
+
+**Example 2: Show draft challenges**
+
+- User: "Show my draft challenges"
+- Action: Call `get_my_challenges` with `{ "status": "draft" }`
+- Display: Table showing draft challenges
+
+**Example 3: Search my challenges**
+
+- User: "Do I have a challenge about binary trees?"
+- Action: Call `get_my_challenges` with `{ "search": "binary tree" }`
+- Display: Table showing matching challenges
+
+**Example 4: Filter by language**
+
+- User: "Show my Python challenges"
+- Action: Call `get_my_challenges` with `{ "language": "Python" }`
+- Display: Table showing Python challenges
+
+**Example 5: Get next page**
+
+- User: "Show me the next page"
+- Action: Call `get_my_challenges` with `{ "page": 2 }`
+- Display: Table showing the second page of results

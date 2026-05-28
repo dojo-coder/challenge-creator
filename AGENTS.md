@@ -36,7 +36,7 @@ The system supports two main categories of challenges:
 - **cpp**: C++ with Catch2 testing framework
 - **csharp**: C# with xUnit testing framework
 - **go**: Go with testing package
-- **solidity**: Solidity with mocha testing
+- **solidity**: Solidity with Foundry (`forge test`) — Solidity-native tests via `forge-std/Test.sol`
 
 Note: The Node templates (`nodejs-jest`, `nodets-jest`) support running an HTTP server (for example using Node's built-in `http` or `express`). This enables two optional interactive behaviors that a challenge variation may expose:
 
@@ -61,6 +61,45 @@ Note: A reference sample demonstrating both Live Preview and API Tester is inclu
 - **vanillajs-jest**: Vanilla JavaScript with Jest testing framework using @testing-library/dom
 - **vanillats-jest**: Vanilla TypeScript with Jest testing framework using @testing-library/dom
 - **angular-jest**: Angular with Jest testing framework using @testing-library/angular
+- **solidjs**: SolidJS with Vitest using @solidjs/testing-library
+- **solidjs_ts**: SolidJS TypeScript with Vitest using @solidjs/testing-library
+
+#### Full Stack Challenges
+
+Full-stack templates run their framework's dev server and combine frontend rendering with server-side routes / loaders / actions / API routes. Tests use Vitest.
+
+- **nextjs**: Next.js (App Router) JavaScript with Vitest using @testing-library/react
+- **nextjs_ts**: Next.js (App Router) TypeScript with Vitest using @testing-library/react
+- **astro**: Astro JavaScript with Vitest using astro/container (`experimental_AstroContainer`)
+- **astro_ts**: Astro TypeScript with Vitest using astro/container (`experimental_AstroContainer`)
+- **sveltekit**: SvelteKit JavaScript with Vitest using @testing-library/svelte (Svelte 5)
+- **sveltekit_ts**: SvelteKit TypeScript with Vitest using @testing-library/svelte (Svelte 5)
+- **remix**: Remix (Vite) JavaScript with Vitest using @testing-library/react
+- **remix_ts**: Remix (Vite) TypeScript with Vitest using @testing-library/react
+
+#### Backend Challenges
+
+Backend templates run their framework's HTTP server and expose API endpoints. Tests use Vitest plus the framework's built-in request injector (no real port is bound during tests).
+
+- **nestjs**: NestJS TypeScript with Vitest + @nestjs/testing (`Test.createTestingModule(...).compile()`). Author edits services / controllers; the controller's `getHello()` etc. is called directly in tests.
+- **fastify**: Fastify TypeScript with Vitest using `app.inject({ method, url })` against the `FastifyInstance` returned by `buildApp()`.
+- **hono**: Hono TypeScript with Vitest using `app.request(path)` against the exported Hono instance. Handlers MUST `return` `c.text()` / `c.json()` — calling without returning sends an empty response.
+
+#### Database Challenges
+
+Database templates run an in-browser WebAssembly database for the live Preview, and the same WASM driver in Node for tests. The user edits `.sql` files; on save, every non-test `.sql` file is re-executed against the same in-memory database in lexicographic order (prefix files like `01-schema.sql`, `02-data.sql` if you need ordering). Files named `*.test.sql` are skipped by auto-run. The Preview panel renders rows from the last `SELECT` plus a live schema sidebar.
+
+- **pglite**: PostgreSQL in WASM via `@electric-sql/pglite`. Tests use `createPgliteTestDb(import.meta.url)` from `@dojocode/sql-test-helpers/pglite` — returns a `PgliteTestDb` instance pre-seeded by running every project `.sql` file, with `await db.query<T>(sql)` for assertions. Supports CTEs, window functions, JSON, full-text search, `SERIAL`, `ON CONFLICT`.
+- **sqlite**: SQLite in WASM via `@sqlite.org/sqlite-wasm`. Tests use `createSqliteTestDb(import.meta.url)` from `@dojocode/sql-test-helpers/sqlite` — returns a `SqliteTestDb` instance (synchronous `db.query<T>(sql)`). Use `INTEGER PRIMARY KEY AUTOINCREMENT` instead of PostgreSQL's `SERIAL`; introspect schema with `sqlite_master` and `PRAGMA table_info(...)`.
+
+#### Mobile Challenges
+
+Mobile templates run React Native components (`View`, `Text`, `StyleSheet`, `Pressable`, etc.) in the browser via [`react-native-web`](https://necolas.github.io/react-native-web/). The same `App.{jsx,tsx}` source compiles unchanged for iOS/Android via Expo or RN CLI — only the browser preview is the differentiator. Source code imports from `'react-native'`; the Vite alias resolves to `react-native-web` at build/test time.
+
+- **react-native**: React Native primitives in JavaScript, Vitest + @testing-library/react. Render `Text` and assert via `screen.getByText(...)` — RN web maps `Text` to a `<div>` so DOM testing-library queries work normally. Press events: use `fireEvent.click(...)` (RN web translates `onPress` → click).
+- **react-native-ts**: Same as above with TypeScript. Types from `@types/react-native` (style objects: `ViewStyle`, `TextStyle`, `ImageStyle`).
+
+Sample challenges live under `samples/react-native-example-challenge/` and `samples/react-native-ts-example-challenge/`. Copy their `package.json` when bootstrapping a new mobile challenge — they ship `react`, `react-dom`, `react-native-web`, plus the TS variant's `@types/react-native` + `typescript`.
 
 ### Challenge Structure
 
@@ -147,7 +186,11 @@ Each directory has a corresponding JSON configuration file:
 
 - Only when explicitly instructed to "generate for all translations" should you create files for all available templates
 - Currently supports terminal templates: nodejs-jest, nodets-jest, python, php, java, ruby, rust, c, cpp, csharp, go, solidity
-- Currently supports browser templates: vuejs-jest, vuets-jest, reactjs-jest, reactts-jest, svelte-jest, vanillajs-jest, vanillats-jest, angular-jest
+- Currently supports browser templates: vuejs-jest, vuets-jest, reactjs-jest, reactts-jest, svelte-jest, vanillajs-jest, vanillats-jest, angular-jest, solidjs, solidjs_ts
+- Currently supports full-stack templates: nextjs, nextjs_ts, astro, astro_ts, sveltekit, sveltekit_ts, remix, remix_ts
+- Currently supports backend templates: nestjs, fastify, hono
+- Currently supports database templates: pglite, sqlite
+- Currently supports mobile templates: react-native, react-native-ts
 
 ### 3. Export Content Generation
 
@@ -161,12 +204,14 @@ Each directory has a corresponding JSON configuration file:
 - The `README.md` must **not be empty** — it is required by the `createExportContent.js` script and is included in the exported zip
 - **Always create or verify `README.md` exists before running `createExportContent.js`** or any update/upload workflow
 
-### 5. Browser Challenge Package Setup
+### 5. Browser / Full Stack / Mobile Challenge Package Setup
 
-When creating browser challenges (vuejs-jest, vuets-jest, reactjs-jest, reactts-jest, svelte-jest, vanillajs-jest, vanillats-jest, or angular-jest):
+When creating browser, full-stack, or mobile challenges, copy `package.json` from the matching sample directory. Backend (nestjs / fastify / hono) and database (pglite / sqlite) challenges do NOT need a `package.json` — their deps are baked into the Docker image / template seed.
 
 1. **Create challenge directory structure**: `challenges/[challenge-name]/templates/[templateName]/`
 2. **Copy package.json from sample directory inside new directory**: Copy package.json from the corresponding sample challenge:
+
+   **Browser:**
    - **Vue.js**: Copy from `samples/vuejs-example-challenge/package.json`
    - **Vue.js TypeScript**: Copy from `samples/vuets-example-challenge/package.json`
    - **React.js**: Copy from `samples/reactjs-example-challenge/package.json`
@@ -175,8 +220,31 @@ When creating browser challenges (vuejs-jest, vuets-jest, reactjs-jest, reactts-
    - **VanillaJS**: Copy from `samples/vanilla-js-example-challenge/package.json`
    - **VanillaTS**: Copy from `samples/vanilla-ts-example-challenge/package.json`
    - **Angular**: Copy from `samples/angular-example-challenge/package.json`
+   - **SolidJS**: Copy from `samples/solidjs-example-challenge/package.json`
+   - **SolidJS TypeScript**: Copy from `samples/solidjs_ts-example-challenge/package.json`
 
-_Note: Package files are pre-configured in samples with only core framework packages. Testing dependencies (@testing-library, jest, etc.) are already included in the Docker images._
+   **Full Stack:**
+   - **Next.js**: Copy from `samples/nextjs-example-challenge/package.json`
+   - **Next.js TypeScript**: Copy from `samples/nextjs_ts-example-challenge/package.json`
+   - **Astro**: Copy from `samples/astro-example-challenge/package.json`
+   - **Astro TypeScript**: Copy from `samples/astro_ts-example-challenge/package.json`
+   - **SvelteKit**: Copy from `samples/sveltekit-example-challenge/package.json`
+   - **SvelteKit TypeScript**: Copy from `samples/sveltekit_ts-example-challenge/package.json`
+   - **Remix**: Copy from `samples/remix-example-challenge/package.json`
+   - **Remix TypeScript**: Copy from `samples/remix_ts-example-challenge/package.json`
+
+   **Mobile:**
+   - **React Native**: Copy from `samples/react-native-example-challenge/package.json`
+   - **React Native TypeScript**: Copy from `samples/react-native-ts-example-challenge/package.json`
+
+   **Backend & Database — no package.json needed:**
+   - **NestJS** (`samples/nestjs-example-challenge`) — deps in Docker image
+   - **Fastify** (`samples/fastify-example-challenge`) — deps in Docker image
+   - **Hono** (`samples/hono-example-challenge`) — deps in Docker image
+   - **PGlite** (`samples/pglite-example-challenge`) — deps in Docker image (`@electric-sql/pglite`, `@dojocode/sql-test-helpers`)
+   - **SQLite** (`samples/sqlite-example-challenge`) — deps in Docker image (`@sqlite.org/sqlite-wasm`, `@dojocode/sql-test-helpers`)
+
+_Note: Package files are pre-configured in samples with only core framework packages. Testing dependencies (@testing-library, jest, vitest, etc.) are already included in the Docker images._
 
 ### 6. Challenge Naming Convention
 
@@ -286,7 +354,7 @@ Avoid lengthy implementation details or extensive code examples that can be foun
 - **cpp**: `main.cpp`
 - **csharp**: `Main.cs` (in `Challenge` namespace)
 - **go**: `main.go`
-- **solidity**: `main.js`
+- **solidity**: `Main.s.sol` (Foundry script at challenge root, extends `forge-std/Script.sol`; `run()` is the entrypoint)
 
 **Main File Examples**:
 
@@ -411,7 +479,35 @@ func main() {
 }
 ```
 
-**Note**: Browser challenges (vuejs-jest, vuets-jest, reactjs-jest, reactts-jest, svelte-jest, vanillajs-jest, vanillats-jest, angular-jest) do **not** require main files as they use browser preview instead of code execution.
+**Solidity (Main.s.sol)**:
+
+Lives at the challenge root (next to `foundry.toml`, alongside `src/` and `tests/`). The file is a Foundry **script** that extends `forge-std/Script.sol`; its `run()` function is the entrypoint. Executed via `forge script Main.s.sol` — no anvil/local node is needed. `console.log` from `forge-std/console.sol` writes to the Run Code output panel; `vm.*` cheatcodes (e.g. `vm.prank`) are available for impersonation.
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.34;
+
+import "forge-std/Script.sol";
+import "forge-std/console.sol";
+import "./src/HelloWorld.sol";
+
+contract Main is Script {
+    function run() external {
+        HelloWorld instance = new HelloWorld();
+        console.log(instance.helloWorld());
+    }
+}
+```
+
+Key layout rules for Solidity challenges:
+
+- Contracts go under `/src/` — e.g. `/src/HelloWorld.sol`.
+- Tests go under `/tests/` with the `.t.sol` extension and extend `forge-std/Test.sol` — e.g. `/tests/HelloWorld.t.sol`.
+- The main script sits at the root — `/Main.s.sol` — so `mainFilePath` is `/Main.s.sol` in `metadata.json`.
+- A one-line comment directly above each `function test*()` in a `.t.sol` file becomes the human-readable test label: `// ...`, `/// ...`, `/// @notice ...`, or `/// @dev ...` are all recognised.
+- npm packages (OpenZeppelin, Chainlink, etc.) are auto-remapped from `node_modules/` because `foundry.toml` declares `libs = ["lib", "node_modules"]` with `auto_detect_remappings = true` — forge scans both paths and generates remappings at build time. Import as `@openzeppelin/contracts/utils/Strings.sol` directly.
+
+**Note**: Browser challenges (vuejs-jest, vuets-jest, reactjs-jest, reactts-jest, svelte-jest, vanillajs-jest, vanillats-jest, angular-jest, solidjs, solidjs_ts), full-stack challenges (nextjs, nextjs_ts, astro, astro_ts, sveltekit, sveltekit_ts, remix, remix_ts), backend challenges (nestjs, fastify, hono), and database challenges (pglite, sqlite) do **not** require main files. Browser/full-stack templates use the framework's dev server for preview; backend templates auto-start their HTTP server; database templates auto-run their `.sql` files against an in-memory DB.
 
 ### Solution Files (solutionFiles/)
 
@@ -446,7 +542,7 @@ func main() {
 - Initial Tests: 5 tests covering basic functionality
 - All Tests: Same 5 tests + 3-7 additional edge case tests = 8-12 total tests
 
-- Use appropriate testing frameworks (Jest for Node.js, VueJS, ReactJS, pytest for Python, PHPUnit for php, Jupiter for Java, rspec for Ruby, test for Rust, Criterion for C, Catch2 for C++, xUnit for C#, testing for Go)
+- Use appropriate testing frameworks (Jest for Node.js, VueJS, ReactJS, pytest for Python, PHPUnit for php, Jupiter for Java, rspec for Ruby, test for Rust, Criterion for C, Catch2 for C++, xUnit for C#, testing for Go, forge-std for Solidity)
 - Include descriptive test names and clear assertions
 
 #### Test Structure by Template
@@ -575,6 +671,18 @@ func main() {
 - Use descriptive test names: `"displays the first image"`, `"has the previous button initially disabled"`
 - Use Angular-specific testing utilities when needed
 
+**React Native / React Native TypeScript (Mobile)**:
+
+- Use `import { render, screen, fireEvent } from '@testing-library/react';`
+- Import component from `'./ComponentName'` (Vitest auto-resolves `.jsx` / `.tsx`)
+- Source files import RN primitives from `'react-native'` (NOT `'react-native-web'`) — the Vite alias resolves at test time
+- Render with plain JSX: `render(<App />);` — no factory thunk (unlike Solid)
+- For press interactions, use `fireEvent.click(...)` — RN web translates `onPress` to web `click` events. **Do NOT** use `fireEvent.press`
+- RN web renders `View` as a `<div>`, `Text` as a `<div>` with `dir="auto"`, and `Pressable` as a `<div>` with role/tabindex — so `screen.getByText(...)` and `screen.getByRole(...)` work normally against jsdom
+- Vitest globals (`describe`, `test`, `expect`) are auto-injected via the template's `vitest.config`
+- Test file extension: `.spec.jsx` for `react-native`, `.spec.tsx` for `react-native-ts`
+- Use descriptive test names: `"renders 'Hello, World!'"`, `"increments count when pressing the button"`
+
 **Rust (Terminal)**:
 
 - Use `#[cfg(test)]` module with `use crate::app::function_name as alias;`
@@ -612,6 +720,101 @@ func main() {
 - Use `t.Run()` subtests with descriptive names: `"It should return 'Hello World!'"`, `"Returns empty for empty input"`
 - Use `t.Errorf()` for test failure messages
 - All test files must end with `_test.go` suffix
+
+**Solidity/Foundry (Terminal)**:
+
+- Use `import "forge-std/Test.sol";` and import contracts from `"../src/<ContractName>.sol"` (test files live at `/tests/`, contracts at `/src/`)
+- Structure: `contract <Name>Test is Test { function setUp() public { ... } function test...() public { ... } }`
+- Test file names must end with `.t.sol`; function names must start with `test` (`testFuzz*` for fuzzed, `testFail*` for expected-revert)
+- Add a one-line comment directly above each test function — `// ...`, `/// ...`, `/// @notice ...`, or `/// @dev ...` — to produce a human-readable label in the results panel (otherwise the raw function name is shown)
+- Use forge-std assertions: `assertEq`, `assertTrue`, `assertFalse`, `assertGt`, `assertLt`, `assertApproxEqAbs`, `assertApproxEqRel`
+- Use `vm` cheatcodes for setup/impersonation: `vm.prank(addr)` for next-call sender, `vm.expectRevert(bytes("reason"))` to assert a revert, `vm.warp(ts)` / `vm.roll(bn)` for time/block override, `vm.deal(addr, amt)` for ETH balance
+- `setUp()` runs before every test; `address(this)` is the test contract (becomes the deployer/owner for contracts it constructs in `setUp`)
+
+**SolidJS / SolidJS TypeScript (Browser)**:
+
+- Use `import { render, screen } from '@solidjs/testing-library';`
+- Import component from `'./ComponentName'` (Vitest auto-resolves `.jsx` / `.tsx`)
+- Render via a thunk: `render(() => <App />)` — Solid components run inside a reactive scope, so the JSX must be wrapped in a function
+- Vitest globals (`describe`, `test`, `expect`) are auto-injected via `globals: true` in the template's `vitest.config`
+- Use descriptive test names: `"renders 'Hello, World!'"`, `"increments count on button click"`
+
+**Next.js / Next.js TypeScript (Full Stack)**:
+
+- Use `import { render, screen } from '@testing-library/react';`
+- Import page from `'./src/app/page'` (NOT from `./src/app/page.jsx` / `.tsx` — Vitest resolves the extension)
+- Server Components render fine in tests as long as they don't call `cookies()` / `headers()` / database fetches. For Client Components, the `'use client'` directive must be at the top of the source file.
+- Structure: `describe('Page', () => { test('...', () => { render(<Page />); ... }); });`
+- Test file extension: `.spec.jsx` for `nextjs`, `.spec.tsx` for `nextjs_ts`
+
+**Astro / Astro TypeScript (Full Stack)**:
+
+- Use `import { experimental_AstroContainer as AstroContainer } from 'astro/container';` plus `import { describe, it, expect } from 'vitest';`
+- Import page from `'./src/pages/index.astro'`
+- Render to a string for assertions: `const html = await (await AstroContainer.create()).renderToString(Page);`
+- Assert via regex on the HTML string: `expect(html).toMatch(/<h1[^>]*>\s*Hello, World!\s*<\/h1>/);`
+- Test file extension: `.test.js` for `astro`, `.test.ts` for `astro_ts`
+
+**SvelteKit / SvelteKit TypeScript (Full Stack)**:
+
+- Use `import { render, screen } from '@testing-library/svelte';`
+- Import the page from `'./src/routes/+page.svelte'`
+- Render directly with the imported component reference: `render(Page);` (NO factory thunk — unlike Solid)
+- Svelte 5 runes (`$state`, `$derived`, `$effect`) work the same in tests as in dev — the testing library re-renders on state changes automatically
+- Test file extension: `.spec.js` for `sveltekit`, `.spec.ts` for `sveltekit_ts`
+
+**Remix / Remix TypeScript (Full Stack)**:
+
+- Use `import { render, screen } from '@testing-library/react';`
+- Import the route component from `'./app/routes/_index'` (default export). For nested routes, e.g. `'./app/routes/posts._id'`
+- Route components are plain React functions; render them with JSX: `render(<Index />);`
+- For routes that use `useLoaderData()`, mock the hook or wrap with `createRemixStub` from `@remix-run/testing` (not required for the simple HelloWorld sample)
+- Test file extension: `.spec.jsx` for `remix`, `.spec.tsx` for `remix_ts`
+
+**NestJS (Backend)**:
+
+- Use `import 'reflect-metadata';` as the very first line of the test file — decorators rely on metadata reflection
+- Use `import { Test, TestingModule } from '@nestjs/testing';` plus `import { describe, it, expect, beforeEach } from 'vitest';`
+- Import provider classes from their source paths: `import { AppController } from './src/app.controller';`
+- Build the module via `await Test.createTestingModule({ controllers: [...], providers: [...] }).compile();` then `moduleRef.get<T>(T)` to retrieve instances
+- Assert directly on the controller / service methods: `expect(controller.getHello()).toBe('Hello, World!')`
+- Test file naming convention: `*.test.ts` (e.g. `app.controller.test.ts`)
+
+**Fastify (Backend)**:
+
+- Use `import { describe, it, expect, afterEach } from 'vitest';` and `import type { FastifyInstance } from 'fastify';`
+- Import the app factory: `import { buildApp } from './src/app';`
+- Build a fresh instance per test (or per spec file) and ALWAYS `await app?.close()` in `afterEach` — port leaks across spec files cause flaky CI
+- Drive handlers without binding a port: `const response = await app.inject({ method: 'GET', url: '/' });`
+- Assert via `response.statusCode` and `response.body` (for text) or `response.json()` (for JSON)
+- Test file naming convention: `*.test.ts` (e.g. `app.test.ts`)
+
+**Hono (Backend)**:
+
+- Use `import { describe, it, expect } from 'vitest';`
+- Import the Hono instance: `import { app } from './src/app';`
+- Drive handlers without binding a port via the built-in `app.request(path, init?)` — returns a standard Web Fetch `Response`
+- Assert via `response.status` (note: `status`, not `statusCode` like Fastify) and `await response.text()` or `await response.json()`
+- Handlers MUST `return` `c.text()` / `c.json()` / `c.html()` — calling without returning sends an empty response
+- Test file naming convention: `*.test.ts` (e.g. `app.test.ts`)
+
+**PGlite (Database)**:
+
+- Use `import { describe, it, expect, beforeAll } from 'vitest';`
+- Use `import { createPgliteTestDb, type PgliteTestDb } from '@dojocode/sql-test-helpers/pglite';`
+- In `beforeAll`, call `db = await createPgliteTestDb(import.meta.url);` — this discovers every `.sql` file alongside the test (in lex order, excluding `*.test.sql`) and executes them against a fresh in-memory PGlite instance
+- All `db.query<T>(sql)` calls are **async** — `await db.query<{ message: string }>('SELECT message FROM greetings')`
+- For schema introspection, use Postgres catalogs (`information_schema.columns`, `pg_type`, etc.)
+- Test file naming convention: `*.test.ts` (e.g. `greetings.test.ts`)
+
+**SQLite (Database)**:
+
+- Use `import { describe, it, expect, beforeAll } from 'vitest';`
+- Use `import { createSqliteTestDb, type SqliteTestDb } from '@dojocode/sql-test-helpers/sqlite';`
+- In `beforeAll`, call `db = await createSqliteTestDb(import.meta.url);` — same auto-seed-from-`.sql` behaviour as PGlite
+- `db.query<T>(sql)` is **synchronous** (unlike PGlite's async API) — `const rows = db.query<{ message: string }>('SELECT ...')`
+- For schema introspection, use `sqlite_master` (`SELECT name FROM sqlite_master WHERE type='table'`) and `PRAGMA table_info('<table>')`
+- Test file naming convention: `*.test.ts` (e.g. `greetings.test.ts`)
 
 #### Test File Imports
 
@@ -662,6 +865,43 @@ import ComponentName from "./ComponentName.ts";
 // Angular/Jest
 import ComponentName from "./ComponentName.component.ts";
 
+// React Native / React Native TS
+import App from "./App"; // Vitest auto-resolves .jsx / .tsx
+// Source / test files import RN primitives from 'react-native' (Vite aliases to 'react-native-web' at build/test time)
+import { View, Text } from 'react-native';
+
+// SolidJS / SolidJS TS
+import App from "./App"; // Vitest auto-resolves .jsx / .tsx
+
+// Next.js / Next.js TS
+import Page from "./src/app/page"; // App Router page module
+
+// Astro / Astro TS
+import Page from "./src/pages/index.astro";
+import { experimental_AstroContainer as AstroContainer } from 'astro/container';
+
+// SvelteKit / SvelteKit TS
+import Page from "./src/routes/+page.svelte";
+
+// Remix / Remix TS
+import Index from "./app/routes/_index"; // route default export
+
+// NestJS
+import { AppController } from "./src/app.controller";
+import { AppService } from "./src/app.service";
+
+// Fastify
+import { buildApp } from "./src/app";
+
+// Hono
+import { app } from "./src/app";
+
+// PGlite
+import { createPgliteTestDb, type PgliteTestDb } from "@dojocode/sql-test-helpers/pglite";
+
+// SQLite
+import { createSqliteTestDb, type SqliteTestDb } from "@dojocode/sql-test-helpers/sqlite";
+
 // Rust
 use crate::app::function_name as alias;
 
@@ -678,6 +918,12 @@ using Xunit; // test framework
 // Go
 // Functions in same package (package main) are auto-resolved
 import "testing"
+
+// Solidity/Foundry
+import "forge-std/Test.sol";
+import "../src/HelloWorld.sol";   // contracts live under /src/, tests under /tests/
+// npm packages are auto-remapped from node_modules/:
+import "@openzeppelin/contracts/utils/Strings.sol";
 ```
 
 **Incorrect Import**:
@@ -698,13 +944,14 @@ import { functionName } from "../solutionFiles/index"; // ❌ Wrong for NodeTS
 #include "../solutionFiles/app.hpp" // ❌ Wrong for C++
 using Challenge.solutionFiles; // ❌ Wrong for C#
 import "solutionFiles/functionname" // ❌ Wrong for Go
+import "../solutionFiles/src/HelloWorld.sol"; // ❌ Wrong for Solidity — use "../src/HelloWorld.sol"
 ```
 
 This applies to all test files in both `initialTests/` and `allTests/` directories across all templates.
 
 ### Browser Challenge Styling
 
-When generating browser challenges (Vue.js, Vue.js TypeScript, React.js, React.js TypeScript, Svelte, VanillaJS, VanillaTS, Angular), always ensure the UI is elegant and modern:
+When generating browser challenges (Vue.js, Vue.js TypeScript, React.js, React.js TypeScript, Svelte, VanillaJS, VanillaTS, Angular, SolidJS, SolidJS TypeScript), full-stack challenges (Next.js, Next.js TS, Astro, Astro TS, SvelteKit, SvelteKit TS, Remix, Remix TS), and mobile challenges (React Native, React Native TypeScript) always ensure the UI is elegant and modern:
 
 - **Visual Design**: Create custom CSS with cohesive color schemes and professional aesthetics
 - **Typography**: Use appropriate Google Fonts or system fonts for visual appeal
@@ -717,6 +964,8 @@ When generating browser challenges (Vue.js, Vue.js TypeScript, React.js, React.j
 - **Icons & Decorations**: Include relevant decorative elements when appropriate (emojis, symbols, patterns)
 
 **Note**: Avoid generic or plain styling. Each browser challenge should be visually engaging and demonstrate modern web design principles.
+
+**Mobile-specific (React Native, React Native TypeScript)**: Don't use plain CSS — style via `StyleSheet.create({...})` from `'react-native'`. The same style objects must compile unchanged for iOS/Android, so stick to RN style keys (`flex`, `alignItems`, `justifyContent`, `padding`, `fontSize`, `fontWeight`, `color`, `backgroundColor`, etc.) and avoid web-only properties like `gridTemplateColumns`. Use `Flex` layout primitives (`View` with `flexDirection`, `gap`) instead of CSS Grid. Press feedback should be visual via `Pressable`'s `pressed` style callback: `style={({ pressed }) => [styles.btn, pressed && styles.btnPressed]}`.
 
 ### Vue.js Component Structure
 
@@ -766,8 +1015,9 @@ const increment = () => {
 - Tests run in isolated Docker containers
 - Results captured as `.log` files with summary output
 - Browser tests (Vue.js, Vue.js TypeScript, React.js, React.js TypeScript, Svelte, VanillaJS, VanillaTS, Angular) use Jest with @testing-library
+- Mobile tests (React Native, React Native TypeScript) use Vitest with @testing-library/react (RN web maps RN primitives to DOM nodes so the same testing library applies)
 
-**Note**: Terminal challenges (nodejs-jest, nodets-jest, python, php, Java, Ruby, Rust, C, C++, C#, Go, solidity) do not require package.json files.
+**Note**: Terminal challenges (nodejs-jest, nodets-jest, python, php, Java, Ruby, Rust, C, C++, C#, Go, solidity) do not require package.json files. **Backend (nestjs, fastify, hono) and database (pglite, sqlite) challenges also skip package.json** — their dependencies are baked into the Docker image and managed via the template seed.
 
 ## Challenge Types and Examples
 
@@ -1407,8 +1657,8 @@ When instructed to fully test for a specific variation (e.g., "fully test for ch
 2. **Run challenge all tests** (with author solution) - Follow the "Run challenge all tests" instructions above. All tests should pass (no errors, no failed tests).
 3. **Run challenge initial tests with preloaded files** - Follow the "Run challenge initial tests with preloaded files" instructions above. The `tests` array must contain at least one test result. Errors are acceptable, and some or all tests may fail — the important thing is that tests exist in the results. If the `tests` array is empty, fix the preloaded files.
 4. **Run challenge all tests with preloaded files** - Follow the "Run challenge all tests with preloaded files" instructions above. The `tests` array must contain at least one test result. Errors are acceptable, and some or all tests may fail — the important thing is that tests exist in the results. If the `tests` array is empty, fix the preloaded files.
-5. **Run challenge code** (terminal challenges only) - Follow the "Run challenge code" instructions above to verify the main file executes correctly. **Skip this step for browser challenges** (vuejs-jest, vuets-jest, reactjs-jest, reactts-jest, svelte-jest, vanillajs-jest, vanillats-jest, angular-jest) as they use browser preview instead of code execution.
-6. **Run challenge code with preloaded files** (terminal challenges only) - Follow the "Run challenge code with preloaded files" instructions above to verify the starter code runs without errors. **Skip this step for browser challenges** (vuejs-jest, vuets-jest, reactjs-jest, reactts-jest, svelte-jest, vanillajs-jest, vanillats-jest, angular-jest) as they use browser preview instead of code execution.
+5. **Run challenge code** (terminal challenges only) - Follow the "Run challenge code" instructions above to verify the main file executes correctly. **Skip this step for browser, full-stack, backend, and database challenges** (vuejs-jest, vuets-jest, reactjs-jest, reactts-jest, svelte-jest, vanillajs-jest, vanillats-jest, angular-jest, solidjs, solidjs_ts, nextjs, nextjs_ts, astro, astro_ts, sveltekit, sveltekit_ts, remix, remix_ts, nestjs, fastify, hono, pglite, sqlite) as they use browser preview, framework dev servers, or in-memory DB execution instead of a Run-button code execution.
+6. **Run challenge code with preloaded files** (terminal challenges only) - Follow the "Run challenge code with preloaded files" instructions above to verify the starter code runs without errors. **Skip this step for browser, full-stack, backend, and database challenges** (vuejs-jest, vuets-jest, reactjs-jest, reactts-jest, svelte-jest, vanillajs-jest, vanillats-jest, angular-jest, solidjs, solidjs_ts, nextjs, nextjs_ts, astro, astro_ts, sveltekit, sveltekit_ts, remix, remix_ts, nestjs, fastify, hono, pglite, sqlite) as they use browser preview, framework dev servers, or in-memory DB execution instead of a Run-button code execution.
 
 ## Get Challenge from Live Platform
 

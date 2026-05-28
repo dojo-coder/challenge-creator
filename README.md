@@ -16,7 +16,7 @@ DojoCode Challenge Creator is a starter repo for creating coding challenges on t
 
 - AI-powered challenge creation via natural language
 - MCP integration with Claude Code, Codex, Cursor, VS Code Copilot, Gemini CLI, and more
-- [18 language/framework templates](https://docs.dojocode.io/templates/introduction) (terminal + browser)
+- [33 language/framework templates](https://docs.dojocode.io/templates/introduction) (terminal, browser, full-stack, backend, database)
 - Structured output: starter code, solutions, test suites
 - Automated packaging and upload to [DojoCode](https://dojocode.io)
 - Sample challenges for every supported template
@@ -36,7 +36,7 @@ DojoCode Challenge Creator is a starter repo for creating coding challenges on t
 | `rust` | Rust | Built-in test |
 | `c` | C | Criterion |
 | `cpp` | C++ | Catch2 |
-| `solidity` | Solidity | Mocha |
+| `solidity` | Solidity | Foundry (`forge test`, `forge-std`) |
 
 ### Browser
 
@@ -50,6 +50,47 @@ DojoCode Challenge Creator is a starter repo for creating coding challenges on t
 | `angular-jest` | Angular | Jest + Testing Library |
 | `vanillajs-jest` | Vanilla JS | Jest + Testing Library |
 | `vanillats-jest` | Vanilla TS | Jest + Testing Library |
+| `solidjs` | SolidJS | Vitest + @solidjs/testing-library |
+| `solidjs_ts` | SolidJS (TypeScript) | Vitest + @solidjs/testing-library |
+
+### Full Stack
+
+| Template | Framework | Test Framework |
+|----------|-----------|----------------|
+| `nextjs` | Next.js (App Router, Javascript) | Vitest + @testing-library/react |
+| `nextjs_ts` | Next.js (App Router, TypeScript) | Vitest + @testing-library/react |
+| `astro` | Astro (Javascript) | Vitest + `astro/container` |
+| `astro_ts` | Astro (TypeScript) | Vitest + `astro/container` |
+| `sveltekit` | SvelteKit (Svelte 5, Javascript) | Vitest + @testing-library/svelte |
+| `sveltekit_ts` | SvelteKit (Svelte 5, TypeScript) | Vitest + @testing-library/svelte |
+| `remix` | Remix (Vite, Javascript) | Vitest + @testing-library/react |
+| `remix_ts` | Remix (Vite, TypeScript) | Vitest + @testing-library/react |
+
+### Backend
+
+| Template | Framework | Test Framework |
+|----------|-----------|----------------|
+| `nestjs` | NestJS (TypeScript) | Vitest + `@nestjs/testing` (`Test.createTestingModule`) |
+| `fastify` | Fastify (TypeScript) | Vitest + `app.inject()` |
+| `hono` | Hono (TypeScript) | Vitest + `app.request()` |
+
+### Database
+
+In-browser WebAssembly databases. Authors edit `.sql` files (auto-run in lex order on save against the same in-memory DB); the last `SELECT` renders in the Preview panel. Tests use the `@dojocode/sql-test-helpers` package, which seeds a fresh DB per test file from the project's `.sql` files.
+
+| Template | Engine | Test Framework |
+|----------|--------|----------------|
+| `pglite` | PostgreSQL via `@electric-sql/pglite` (WASM) | Vitest + `createPgliteTestDb` (async `db.query`) |
+| `sqlite` | SQLite via `@sqlite.org/sqlite-wasm` (WASM) | Vitest + `createSqliteTestDb` (sync `db.query`) |
+
+### Mobile
+
+React Native components running in the browser via [`react-native-web`](https://necolas.github.io/react-native-web/). Source files import RN primitives (`View`, `Text`, `StyleSheet`, `Pressable`, ...) from `'react-native'` — the Vite alias redirects to the web shim at build/test time. The same `App.{jsx,tsx}` source compiles unchanged for iOS/Android via Expo or RN CLI.
+
+| Template | Framework | Test Framework |
+|----------|-----------|----------------|
+| `react-native` | React Native Web (Javascript) | Vitest + @testing-library/react |
+| `react-native-ts` | React Native Web (TypeScript) | Vitest + @testing-library/react |
 
 ## Requirements
 
@@ -143,11 +184,11 @@ challenge-creator/
 ├── downloadChallengeFiles.js    # Downloads challenges from DojoCode
 ├── challenges/                  # Your generated challenges go here
 │   └── .gitkeep
-├── samples/                     # Reference challenges for all 18 templates
+├── samples/                     # Reference challenges for all 33 templates
 │   ├── nodejs-example-challenge/
 │   ├── python-example-challenge/
 │   ├── reactjs-example-challenge/
-│   └── ... (18 templates)
+│   └── ... (33 templates: terminal, browser, full-stack, backend, database)
 └── temp/                        # Temporary working directory
 ```
 
